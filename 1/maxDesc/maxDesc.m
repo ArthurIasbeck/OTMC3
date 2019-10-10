@@ -14,6 +14,9 @@ f = @(x) 0.5*k2*x(1).^2 + 0.5*k3*(x(2) - x(1)).^2 + 0.5*k1*x(2).^2 ...
 df = @(x) [k2*x(1) - k3*(x(2) - x(1))
            k3*(x(2) - x(1)) + k1*x(2) - F];
 
+% Atualização de x (s)
+s = @(x0) -df(x0);
+       
 % Parâmetros pra execução do algorítmo
 x0 = [0, 0]';
 tol = 1e-4;
@@ -25,7 +28,7 @@ nVal = 0;
 
 while 1 
     % Reduzir a dimensão do problema de otimização
-    f1 = @(alfa) f(x0 - alfa.*df(x0));
+    f1 = @(alfa) f(x0 + alfa*s(x0));
     
     % Resolver o problema de otimização uni-dimensional
     [alfaOpt,~,nVal1] = aureaSec(f1,-1,1,1e-4);
