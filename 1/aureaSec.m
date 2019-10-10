@@ -7,8 +7,8 @@ function [xOpt, fOpt, k] = aureaSec(f,a,b,tol)
 
     alfa = a + (1 - tal)*(b - a);
     beta = a + tal*(b - a);
-    fAlfa = f(alfa)
-    fBeta = f(beta)
+    fAlfa = f(alfa);
+    fBeta = f(beta);
 
     k = 1;
 
@@ -18,13 +18,13 @@ function [xOpt, fOpt, k] = aureaSec(f,a,b,tol)
             alfa = beta;
             fAlfa = fBeta;
             beta = a + tal*(b - a);
-            fBeta = f(beta)
+            fBeta = f(beta);
         elseif fAlfa <= fBeta
             b = beta;
             beta = alfa;
             fBeta = fAlfa;
             alfa = a + (1 - tal)*(b - a);
-            fAlfa = f(alfa)
+            fAlfa = f(alfa);
         end
         k = k + 1;
     end
