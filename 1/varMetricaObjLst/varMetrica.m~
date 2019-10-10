@@ -1,0 +1,79 @@
+init;
+
+addpath('..');
+
+% Definição da função objetivo e de seu gradiente
+n = 3; % Dimensão do problema
+
+f = @(x) 4250*x(1).^2 - 1000*x(1)*x(2) - 2500*x(1)*x(3) - 1000*x(1) + ...
+    1500*x(2).^2 - 500*x(2)*x(3) - 2000*x(2) + 5750*x(3).^2 - 3000*x(3);
+
+% df = @(x) [8500*x(1) - 1000*x(2) - 2500*x(3) - 1000
+%            3000*x(2) - 1000*x(1) - 500*x(3) - 2000
+%            11500*x(3) - 500*x(2) - 2500*x(1) - 3000];
+
+h = 0.01;
+df = @(x) [(f([x(1) + h, x(2), x(3)]) - f([x(1), x(2), x(3)]))/h
+           (f([x(1), x(2) + h, x(3)]) - f(x(1), x(2), x(3)))/h
+           (f([x(1), x(2), x(3) + h]) - f(x(1), x(2), x(3)))/h];
+
+% Parâmetros pra execução do algorítmo
+x0 = [0, 0, 0]';
+tol = 1e-4;
+
+% Variáveis para controle de execução
+alfaOptValues = zeros(1,1);
+k = 1;
+nVal = 0;
+H = eye(n);
+
+while 1 
+    % Reduzir a dimensão do problema de otimização 
+    f1 = @(alfa) f(x0 - alfa*H*df(x0));
+    
+    % Resolver o problema de otimização uni-dimensional
+    [alfaOpt,~,nVal1] = aureaSec(f1,-1,1,1e-4);
+    
+    % Atualizar a solução ótima
+    x = x0 - alfaOpt*H*df(x0);
+    
+    % Armazenar dados de execução 
+    alfaOptValues(k) = alfaOpt;
+    nVal = nVal + nVal1;
+   
+    % Verificar a condição de parada
+    cp = norm(x - x0);
+    if cp < tol
+        break;
+    end
+    
+    % Atualização de H (aproximação para a inversa da Matriz Hessiana)
+    p = x - x0;
+    y = df(x) - df(x0);
+    sigma = p'*y;
+    tal = y'*H*y;
+    theta = 1;
+    D = ((sigma + theta*tal)/sigma^2)*(p*p') ...
+        + ((theta - 1)/tal)*(H*y)*(H*y)' ...
+        - (theta/sigma)*(H*y*p' + p*(H*y)');
+    
+    H = H + D;
+
+    % Atualizar variáveis para a próxima iteração
+    x0 = x;
+    
+    k = k + 1;
+end
+
+% TODO: O próximo passo é implementar o Método da Variável Métrica pra
+% resolver este mesmo problema, uma vez que eu já sei o resultado esperado.
+xOpt = x;
+fOpt = f(xOpt);
+
+for i = 1:length(x)
+    fprintf(['x',num2str(i),'* = %.4f\n'], xOpt(i));
+end
+
+fprintf('f(x*) = %.4f\n', fOpt);
+fprintf('Número de avaliações da função objetivo: %d\n', nVal);
+fprintf('Número de iterações: %d\n', k);
