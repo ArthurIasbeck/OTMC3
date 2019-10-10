@@ -6,8 +6,8 @@ b = 600;
 tal = 0.618;
 cp = 1e-8;
 
-alfa = a + (1 - tal)*(b - a)
-beta = a + tal*(b - a)
+alfa = a + (1 - tal)*(b - a);
+beta = a + tal*(b - a);
 fAlfa = f(alfa);
 fBeta = f(beta);
 
