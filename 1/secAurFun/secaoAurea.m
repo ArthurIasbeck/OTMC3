@@ -1,6 +1,8 @@
 init; 
 format long g
 
+addpath('..');
+
 % Função objetivo
 w = 2.5;
 L = 600;
