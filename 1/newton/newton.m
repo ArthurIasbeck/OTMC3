@@ -26,14 +26,18 @@ nVal = 0;
 H = eye(n);
 
 while 1 
-    % Reduzir a dimensão do problema de otimização 
-    f1 = @(alfa) f(x0 - alfa*H*df(x0));
+    % Reduzir a dimensão do problema de otimização    
+    % Matriz Hessiana análitica
+    H = [k2+k3 -k3
+         -k3 k1+k3];
+     
+    f1 = @(alfa) f(x0 - alfa*H\df(x0)); % Newton
     
     % Resolver o problema de otimização uni-dimensional
     [alfaOpt,~,nVal1] = aureaSec(f1,-1,1,1e-4);
     
     % Atualizar a solução ótima
-    x = x0 - alfaOpt*H*df(x0); 
+    x = x0 - alfaOpt*H\df(x0); % Newton
     
     % Armazenar dados de execução 
     alfaOptValues(k) = alfaOpt;
@@ -44,18 +48,6 @@ while 1
     if cp < tol
         break;
     end
-    
-    % Atualização de H (aproximação para a inversa da Matriz Hessiana)
-    p = x - x0;
-    y = df(x) - df(x0);
-    sigma = p'*y;
-    tal = y'*H*y;
-    theta = 1;
-    D = ((sigma + theta*tal)/sigma^2)*(p*p') ...
-        + ((theta - 1)/tal)*(H*y)*(H*y)' ...
-        - (theta/sigma)*(H*y*p' + p*(H*y)');
-    
-    H = H + D;
 
     % Atualizar variáveis para a próxima iteração
     x0 = x;
