@@ -3,6 +3,7 @@ init;
 addpath('..');
 
 % Definição da função objetivo e de seu gradiente
+n = 2; % Dimensão do problema
 k1 = 2;
 k2 = 2.5;
 k3 = 1.5;
@@ -13,9 +14,6 @@ f = @(x) 0.5*k2*x(1).^2 + 0.5*k3*(x(2) - x(1)).^2 + 0.5*k1*x(2).^2 ...
 
 df = @(x) [k2*x(1) - k3*(x(2) - x(1))
            k3*(x(2) - x(1)) + k1*x(2) - F];
-
-% Atualização de x (s)
-s = @(x0) -df(x0);
        
 % Parâmetros pra execução do algorítmo
 x0 = [0, 0]';
@@ -28,30 +26,51 @@ nVal = 0;
 
 while 1 
     % Reduzir a dimensão do problema de otimização
-    f1 = @(alfa) f(x0 + alfa*s(x0));
+%     if k == 1
+%         H = eye(n);
+%     else 
+%         H = H + D;
+%     end
+    
+    H = [k2+k3 -k3
+         -k3 k1+k3];
+    f1 = @(alfa) f(x0 - alfa*H\df(x0));
     
     % Resolver o problema de otimização uni-dimensional
     [alfaOpt,~,nVal1] = aureaSec(f1,-1,1,1e-4);
     
     % Atualizar a solução ótima
-    x = x0 - alfaOpt.*df(x0);
+    x = x0 - alfaOpt*H\df(x0)
     
     % Armazenar dados de execução 
     alfaOptValues(k) = alfaOpt;
     nVal = nVal + nVal1;
-    
+   
     % Verificar a condição de parada
     cp = norm(x - x0);
     if cp < tol
         break;
     end
-   
+    
+    % Computação de D para a próxima iteração
+    
+%     p = x - x0; % n x 1
+%     y = df(x) - df(x0); % n x 1
+%     sigma = p'*y; % 1 x 1
+%     tal = y'*H*y; % 1 x 1
+%     theta = 1;
+%     D = ((sigma + theta*tal)/sigma^2)*(p*p') ...
+%         + ((theta - 1)/sigma)*(H*y)*(H*y)' ...
+%         - (theta/sigma)*(H*y*p' + p*(H*y)');
+    
     % Atualizar variáveis para a próxima iteração
     x0 = x;
     
     k = k + 1;
 end
 
+% TODO: O próximo passo é implementar o Método da Variável Métrica pra
+% resolver este mesmo problema, uma vez que eu já sei o resultado esperado.
 xOpt = x;
 fOpt = f(xOpt);
 
