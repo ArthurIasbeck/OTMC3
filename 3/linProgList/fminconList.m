@@ -1,9 +1,7 @@
 init;
 
-% As restrições são representadas matricialmente, logo, cada linha da
-% matriz A representa uma retrição de desigualdade, enquanto cada linha da
-% matriz Aeq representa uma restrição de igualdade. 
-
+fun = @fObj;
+x0 = rand(1,7);
 % Restrições de desigualdade
 A = [-50.6 -1.23 -1.13 -0.71 -1.03 0 -0.93 
      50.6 1.23 1.13 0.71 1.03 0 0.93
@@ -36,12 +34,9 @@ b = [-62 67 -9 25 -2 9 -1 5 6.5 0 0 0 0 0 0 0.05 2700 0 0 0 0 0 0 0];
 Aeq = [0 0 0 0 25392 34436 32100
        0 0 0 0 0 0 32100];
 beq = [3600 900];
+x = fmincon(fun,x0,A,b,Aeq,beq);
 
-f = [0.93 0.54 1.54 0.77 35 40 -50];
-
-x = linprog(f,A,b,Aeq,beq);
-C = f*x;
+C = fun(x);
 
 display(x);
 display(C);
-
