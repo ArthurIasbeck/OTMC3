@@ -35,679 +35,430 @@
 		\textbf{UNIVERSIDADE FEDERAL DE UBERLÂNDIA} \\ \vspace{0.3cm}
 		\textbf{FACULDADE DE ENGENHARIA MECÂNICA} \\~\\~\\~\\~\\~\\~\\~\\
 		\Large
-		\textbf{DETERMINAÇÃO DOS PONTOS DE MÁXIMO E MÍNIMMO DE UMA FUNÇÃO MULTI-MODAL POR MEIO DA AVALIAÇÃO DAS CONDIÇÕES DE OTIMALIDADE} \\~\\~\\~\\~\\~\\~\\
+		\textbf{LISTA DE OTIMIZAÇÃO CLÁSSICA} \\~\\~\\~\\~\\~\\~\\
 		\large
 		\textbf{ARTHUR HENRIQUE IASBECK} \\~\\~\\~\\~\\~\\~\\~\\
 		\large
 		\textbf{UBERLÂNDIA} \\
-		\textbf{12 DE SETEMBRO DE 2019}
+		\textbf{17 DE OUTUBRO DE 2019}
 	\end{center}
 	\newpage
 	\restoregeometry
 	
 	\setcounter{page}{1} % Impede que a capa seja contada na paginação
 	
-	\section{INTRODUÇÃO}
+	% ==============================================================================================
+	% EXERCÍCIO 1 ==================================================================================
+	% ==============================================================================================
 	
-	O objetivo do presente trabalho foi avaliar a influência dos palpites inicias na obtenção da solução de um problema de otimização multi-modal. Para tal, os pontos de máximo, mínimo, e sela da função $ f(x_1, x_2) $, Eq. \ref{f}, foram obtidos por meio da avaliação das condições de otimalidade, levando-se em consideração uma série de palpites iniciais distintos.
-	\begin{equation}
-	f(x_1, x_2) = x_1 sen(x_1) - x_1 cos^2(x_2) - x_1 \label{f} 
-	\end{equation}
-	
-	\section{CONDIÇÕES DE OTIMALIDADE}
-	
-	Neste caso as condições necessárias de otimalidade, Eqs. \ref{cno1} e \ref{cno2}, formam um sistema a partir do qual podem ser determinados $ x_1^* $ e $ x_2^* $.
-	\begin{gather}
-		\frac{\partial f}{\partial x_1} = F_1 = sen(x_1) + x_1 cos(x_1) - cos^2(x_2) - 1 = 0 \label{cno1}\\
-		\frac{\partial f}{\partial x_2} = F_2 = 2 x_1 cos(x_2) sen(x_2) = 0 \label{cno2}
-	\end{gather}
-	
-	A solução deste sistema não linear foi obtida a partir da implementação de uma rotina do Matlab\textsuperscript{\textregistered} denominada \mcode{fsolve}. A utilização da mesma exige que as Eqs. \ref{cno1} e \ref{cno2} sejam definidas em um arquivo \mcode{.m} da seguinte forma \citep{fsolve}.
-	
-	\begin{lstlisting}
-	function F = firstDevSystem(x)
-		F(1) = sin(x(1)) + x(1)*cos(x(1)) - (cos(x(2)))^2 - 1;
-		F(2) = 2*x(1)*cos(x(2))*sin(x(2));
-	end
-	\end{lstlisting}
+	\section*{EXERCÍCIO 1}
+		No Exercício 1 foi proposto um problema baseado no posicionamento de carros interconectados por molas, que tinha como objetivo a minimização da energia potencial associada ao sistema. A função a ser minimizada neste caso é apresentada na Eq. \ref{fOjb1}
+		\begin{equation}
+			f(X) = \frac{1}{2}X^TKX - X^TP
+			\label{fOjb1}
+		\end{equation}
+		
+		\noindent sendo
+		\begin{gather}
+			X = \left[ \begin{array}{ccc} x_1 & x_2 & x_3 \end{array} \right]^T \\
+			P = \left[ \begin{array}{ccc} 1000 & 2000 & 3000 \end{array} \right]^T \\
+			K = \left[ \begin{array}{ccc} 8500 & -1000 & -2500 \\ -1000 & 3000 & -500 \\ -2500 & -500 & 11500 \end{array} \right]
+		\end{gather}                                  
+		
+		Efetuando a multiplicação matricial introduzida na Eq. \ref{fOjb1} obtém-se $ f(x) $, Eq. \ref{fx}.
+		\begin{equation}
+			\begin{split}
+				f(x) = 4250x_1^2 - 1000 x_1 x_2 - 2500 x_1 x_3 - 1000 x_1 + 1500 x_2^2 \\
+				- 500 x_2 x_3 - 2000 x_2 + 5750 x_3^2 - 3000 x_3 \label{fx}
+			\end{split}
+		\end{equation}
+		
+		A partir da relação introduzida na Eq. \ref{fx} é possível determinar analiticamente $ \nabla f(x) $, Eq \ref{gradF}.
+		\begin{equation}
+			\nabla f(x) = \left[ \begin{array}{ccc}
+			8500 x_1 - 1000 x_2 - 2500 x_3 - 1000 \\
+			3000 x_2 - 1000 x_1 -500 x_3 - 2000 \\
+			11500 x_3 - 500 x_2 - 2500 x_1 - 3000
+			\end{array} \right]
+			\label{gradF}
+		\end{equation} 
+		
+		O Método das Variáveis Métricas foi empregado para determinação de $ x^* $. Esta abordagem é baseada no Método de Newton e propõe uma aproximação para a inversa da Matriz Hessiana, que deve ser atualizada recursivamente. Assim sendo, a cada iteração $ x^{k+1} $ é determinado a partir das Eqs. \ref{atualizaX} e \ref{s}. 
+		\begin{gather}
+			x^{k+1} = x^k + \alpha s^k \label{atualizaX} \\
+			s^k = - \nabla f(x^k)H^k \label{s}
+		\end{gather}
+		
+		
+		\noindent sendo $ H $ uma aproximação para a inversa da Matriz Hessiana. É necessário que a mesma seja atualizada ao fim de cada iteração por meio do emprego das Eqs. \ref{atualizaH} a \ref{atualizaD}.
+		\begin{gather}
+			H^k = H^{k-1} + D^{k-1} \label{atualizaH} \\
+			p = x^k - x^{k-1} \\
+			y = \nabla f(x^k) - \nabla f(x^{k-1}) \\
+			\sigma = p^T y \\
+			\tau = y^T H^k y \\
+			D^k = \frac{\sigma + \theta \tau}{\sigma^2} pp^T + \frac{\theta - 1}{\tau} (H^k y)(H^k y)^T - \frac{\theta}{\sigma} (H^k y p^T + p(H^k y)^T) \label{atualizaD}
+		\end{gather}
+		
+		Pode-se adotar $ \theta = 1 $ ou $ \theta = 0 $. No presente trabalho ambas as possibilidades foram consideradas. 
+		
+		É importante ressaltar que neste caso é necessário que a ordem do problema seja reduzida, de forma a torná-lo uni-dimensional, para que seja possível determinar o valor ótimo de $ \alpha $, que será utilizado na determinação de $ x^{k+1} $, Eq. \ref{atualizaX}. Essa redução se dá em todas as iterações e para operá-la adotou-se
+		\begin{equation}
+			g(\alpha) = f(x^{k-1} - \alpha H \nabla f(x^{k-1})) \label{reducao}
+		\end{equation} 
+		
+		Observe que a relação introduzida na Eq. \ref{reducao} foi baseada naquela apresentada na Eq. \ref{atualizaX} e que $ x^{k-1} $, $ H $ e $ \nabla f(x) $ são conhecidos, de forma que a única variável que resta é o próprio $ \alpha $. Uma vez minimizada $ g(\alpha) $ é determinado $ \alpha^* $ e já é possível empregar a Eq. \ref{atualizaX} para determinação de $ x^{k+1} $. 
+		
+		O código no qual foi implementado o Método das Variáveis métricas é apresentado a seguir. Para minimização de $ g(\alpha) $ e determinação de $ \alpha^* $ foi empregado o Método da Seção Áurea, que foi implementado de forma genérica em \mcode{[xOpt, fOpt, k] = aureaSec(f,a,b,tol)}, sendo \mcode{xOpt} o ponto de ótimo determinado pelo processo de otimização, \mcode{f} a função a ser minimizada, \mcode{fOpt} o valor de $ f(x^*) $, \mcode{k} o numero de chamadas de $ f(x) $, \mcode{a} e \mcode{b} os extremos do espaço de busca, e \mcode{t} a tolerância adotada para encerramento das iterações.
+		
+		\begin{lstlisting}
+clc; clear; close all;
 
-	A rotina \mcode{fsolve} implementa internamente um método recursivo para solução de sistemas não lineares, o que implica que é necessário que lhe seja fornecido uma estimativa inicial para solução, neste caso representado por $ x_0 = [x_{1,0} \;\; x_{2,0}] $ \citep{fsolve}. Para obtenção de $ x = [x_1^* \;\; x_2^*] $ e subsequente computação de $ f(x_1^*, x_2^*) $ foi implementado o algoritmo introduzido abaixo.
-	\begin{lstlisting}
-	x0 = [x01, x02];
-	x = fsolve(@firstDevSystem,x0);
-	f = x(1)*sin(x(1)) - x(1)*(cos(x(2)))^2 - x(1);
-	\end{lstlisting}
+addpath('..');
+
+% Parametros pra execucao do algoritmo
+n = 3;
+numGrad = 0; 
+x0 = [0, 0, 0]';
+tol = 1e-4;
+
+% Definicao da funcao objetivo
+f = @(x) 4250*x(1).^2 - 1000*x(1)*x(2) - 2500*x(1)*x(3) - 1000*x(1) + ...
+1500*x(2).^2 - 500*x(2)*x(3) - 2000*x(2) + 5750*x(3).^2 - 3000*x(3);
+
+if numGrad
+	% Definicao numerica do gradiente
+	h = 1e-10;
+	df = @(x) [(f([x(1) + h, x(2), x(3)]) - f([x(1), x(2), x(3)]))/h
+	(f([x(1), x(2) + h, x(3)]) - f([x(1), x(2), x(3)]))/h
+	(f([x(1), x(2), x(3) + h]) - f([x(1), x(2), x(3)]))/h];
+else 
+	% Definicao analitica do gradiente
+	df = @(x) [8500*x(1) - 1000*x(2) - 2500*x(3) - 1000
+	3000*x(2) - 1000*x(1) - 500*x(3) - 2000
+	11500*x(3) - 500*x(2) - 2500*x(1) - 3000];
+end
+
+% Variaveis para controle de execucao
+alfaOptValues = zeros(1,1);
+k = 1;
+nVal = 0;
+H = eye(n);
+
+while 1 
+	% Reduzir a dimensao do problema de otimizacao
+	g = @(alfa) f(x0 - alfa*H*df(x0));
 	
-	Uma vez determinados $ x_1^* $ e $ x_2^* $, é preciso que a condição suficiente de otimalidade seja avaliada a partir da computação dos autovalores da matriz Hessiana $ H $, Eq. \ref{hessiana}. Para tal foi empregada a função \mcode{eig} \citep{eig}.
-	\begin{equation}
-		H = \left| \begin{array}{cc} 
-			\dfrac{\partial^2 f}{\partial x_1^2} & \dfrac{\partial^2 f}{\partial x_1 \partial x_2} \vspace{0.3cm}\\ 
-			\dfrac{\partial^2 f}{\partial x_2 \partial x_1} & \dfrac{\partial^2 f}{\partial x_2^2}
-		\end{array} \right|_{x = x^*}
-		\label{hessiana}
-	\end{equation}
+	% Resolver o problema de otimizacao uni-dimensional
+	[alfaOpt,~,nVal1] = aureaSec(g,-1,1,1e-4);
 	
-	Caso os autovalores da matriz Hessiana sejam todos positivos, é possível afirmar que $ (x_1^*, x_2^*) $ é um ponto de mínimo. Caso sejam todos negativos, $ (x_1^*, x_2^*) $ consiste num ponto de máximo. Caso outra configuração seja obtida para os autovalores da matriz Hessiana, é possível concluir que $ (x_1^*, x_2^*) $ é um ponto de sela.
+	% Atualizar a solucao otima
+	x = x0 - alfaOpt*H*df(x0);
 	
-	Para que seja possível computar a matriz Hessiana, é necessário que as derivadas introduzidas em sua definição sejam elaboradas, Eqs. \ref{dev1} a \ref{dev4}.
-	\begin{gather}
-		\dfrac{\partial^2 f}{\partial x_1^2} = 2 cos(x_1) - x_1 sen(x_1) \label{dev1} \\
-		\dfrac{\partial^2 f}{\partial x_2^2} = 2 x_1 (cos^2(x_2) - sen^2(x_2)) \label{dev2} \\
-		\dfrac{\partial^2 f}{\partial x_1 \partial x_2} = 2 cos(x_2) sen(x_2) \label{dev3}  \\
-		\dfrac{\partial^2 f}{\partial x_2 \partial x_1} = 2 cos(x_2) sen(x_2) \label{dev4} 
-	\end{gather}
+	% Armazenar dados de execucao 
+	alfaOptValues(k) = alfaOpt;
+	if numGrad 
+		nVal = nVal + nVal1 + 6;
+	else
+		nVal = nVal + nVal1 + 1; 
+	end
 	
-	\section{COMPUTAÇÃO DE $\pmb{x_1^*}$ E $\pmb{x_2^*}$}
+	% OBS : Lembre-se que e necessaria a computacao do gradiente para atualizacao de x. No entanto, se estivermos utilizando a aproximacao numerica para o gradiente, a computacao do mesmo levara, neste caso a 6 avaliacoes da funcao objetivo.
 	
-	Resumidamente, a computação das Eqs. \ref{cno1} e \ref{cno2} através da implementação da função \mcode{fsolve}, possibilita a determinação do ponto $ (x_1^*, x_2^*) $, enquanto a avaliação dos autovalores da matriz Hessiana, Eq. \ref{hessiana}, indica se $ (x_1^*, x_2^*) $ é um ponto de máximo, mínimo, ou sela. No entanto, como discutido anteriormente, o emprego da rotina \mcode{fsolve} exige que seja proposta uma estimativa inicial para a solução do problema de otimização.
+	% Verificar a condicao de parada
+	cp = norm(x - x0);
+	if cp < tol
+		break;
+	end
 	
-	Para que fosse possível avaliar a influência de $ x_0 = [x_{1,0} \;\; x_{2,0}] $ na solução do problema de otimização, foi proposta uma discretização dos domínios de $ x_1 $ e $ x_2 $. As análises introduzidas no presente trabalho foram realizadas considerando-se $ 0 \leq x_1, x_2 \leq 15  $. Para garantir que $ x_{1,0} $ e $ x_{2,0} $ assumissem valores distribuídos ao longo de todo o domínio, foi adotada uma discretização do mesmo em $ n $ elementos para que em seguida fossem implementadas todas as combinações possíveis entre $ x_{1,0} $ e $ x_{2,0} $. 
+	% Atualizacao de H (aproximacao para a inversa da Matriz Hessiana)
+	p = x - x0;
+	y = df(x) - df(x0);
+	sigma = p'*y;
+	tal = y'*H*y;
+	theta = 1;
+	D = ((sigma + theta*tal)/sigma^2)*(p*p') ...
+	+ ((theta - 1)/tal)*(H*y)*(H*y)' ...
+	- (theta/sigma)*(H*y*p' + p*(H*y)');
 	
-	Os dados introduzidos na Tab. \ref{resultados} foram obtidos considerando-se $ n = 5 $. À última coluna da tabela foram atribuídos os valores -1, 0 e 1, indicando que $ (x_1^*, x_2^*) $ é um ponto de mínimo, de sela, ou de máximo respectivamente. Neste caso, $ [0 \;\; 3,75 \;\; 7,5 \;\; 11,25 \;\; 15] $ são os valores que podem ser atribuídos a $ x_{1,0} $ e $ x_{2,0} $. Como todas as combinações possíveis entre estas variáveis foram adotadas, há 25 configurações distintas para $ x_0 $. Os dados obtidos para $ n = 20 $ são introduzidos no Anexo A, Tab. \ref{resultadosCompletos}.   
+	H = H + D;
+	
+	% Atualizar variaveis para a proxima iteracao
+	x0 = x;
+	k = k + 1;
+end
+
+xOpt = x;
+fOpt = f(xOpt);
+
+for i = 1:length(x)
+	fprintf(['x',num2str(i),'* = %.4f\n'], xOpt(i));
+end
+
+fprintf('f(x*) = %.4f\n', fOpt);
+fprintf('Numero de avaliacoes da funcao objetivo: %d\n', nVal);
+fprintf('Numero de iteracoes: %d\n', k);
+		\end{lstlisting} 
+	
+	\vspace{0.4cm}
+	É importante ressaltar que a forma como o Método da Variável Métrica foi implementado possibilita que seja empregado tanto o gradiente calculado analiticamente quanto aquele obtido numericamente, bastando que seja modificada a variável \mcode{numGrad}.
+	
+	Os resultados obtidos a partir da execução do algoritmo apresentado são introduzidos na Tab. \ref{resultados}. É interessante observar que, para o estudo de caso em questão, a forma como é computado o gradiente não influencia no valor de $ x^* $, assim como o valor de $ \theta $ também não foi relevante na solução do problema de otimização. Cabe ressaltar, no entanto, que a computação numérica do gradiente leva a um maior número de avaliações da função objetivo. 
 	
 	\begin{table}[H]
 		\centering
-		\caption{Avaliação das soluções obtidas quando $ n = 5 $.}
+		\caption{Resultados obtidos a partir da implementação do Método da Variável Métrica.}
 		\label{resultados}
-		\begin{tabular}{@{}cccccc@{}}
-			\toprule
-			$ x_{1,0} $   & $ x_{2,0} $   & $ x_1^* $      & $ x_2^* $      & $ f(x_1^*, x_2^*) $        & $ H(x_1^*, x_2^*) $  \\ \midrule
-			0,00  & 0,00  & 1,0769  & 0,0000  & -1,2056  & -1 \\
-			0,00  & 3,75  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-			0,00  & 7,50  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-			0,00  & 11,25 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-			0,00  & 15,00 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-			3,75  & 0,00  & 5,2808  & 0,0000  & -15,0120 & -1 \\
-			3,75  & 3,75  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-			3,75  & 7,50  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-			3,75  & 11,25 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-			3,75  & 15,00 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-			7,50  & 0,00  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-			7,50  & 3,75  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-			7,50  & 7,50  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-			7,50  & 11,25 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-			7,50  & 15,00 & 7,7230  & 15,7080 & -7,7892  & 0  \\
-			11,25 & 0,00  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-			11,25 & 3,75  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-			11,25 & 7,50  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-			11,25 & 11,25 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-			11,25 & 15,00 & 11,2620 & 15,7080 & -33,3887 & -1 \\
-			15,00 & 0,00  & 14,0658 & 0,0000  & -14,1016 & 0  \\
-			15,00 & 3,75  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-			15,00 & 7,50  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-			15,00 & 11,25 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-			15,00 & 15,00 & 14,0658 & 15,7080 & -14,1016 & 0  \\ \bottomrule
+		\begin{tabular}{|c|c|c|c|c|c|c|c|}
+			\hline
+			\begin{tabular}[c]{@{}c@{}}Computação do\\ gradiente\end{tabular} & $\theta$ & $x_1^*$                 & $x_2^*$                & $x_3^*$                 & $f(x^*)$                    & $n_{val}$            & $k$                \\ \hline
+			\multirow{2}{*}{Numérica}                                         &     0            & \multirow{4}{*}{0,3241} & \multirow{4}{*}{0,836} & \multirow{4}{*}{0,3677} & \multirow{4}{*}{-1549,5888} & \multirow{2}{*}{140} & \multirow{4}{*}{5} \\ \cline{2-2}
+			& 1        &                         &                        &                         &                             &                      &                    \\ \cline{1-2} \cline{7-7}
+			\multirow{2}{*}{Analítica}                                        & 0        &                         &                        &                         &                             & \multirow{2}{*}{115} &                    \\ \cline{2-2}
+			& 1        &                         &                        &                         &                             &                      &                    \\ \hline
 		\end{tabular}
 	\end{table}
-	
-	Avaliando os dados introduzidos na Tab. \ref{resultados}, fica clara a influência dos palpites iniciais na determinação dos pontos ótimos. Os resultados indicam que o método empregado pela função \mcode{fsolve} para determinação de $ x_1^* $ e $ x_2^* $ converge, na maioria das vezes, para o ponto ótimo mais próximo de $ (x_{1,0}, \; x_{2,0}) $. Além disso, a avaliação da última coluna da tabela indica que o atendimento das condições necessárias de otimalidade não garante a obtenção de um ponto de mínimo e nem de máximo, como já era esperado. 
-	
- 	Nas Figs. \ref{3d1}, \ref{3d2} e \ref{3d3} são reproduzidos graficamente tanto a função $ f(x_1, x_2) $, quanto os pontos $ (x_1^*, \; x_2^*) $ de máximo, mínimo, e de sela, apresentados respectivamente em vermelho, preto e amarelo. Neste caso assumiu-se $ n = 20 $ e todos os pontos ótimos contidos no intervalo adotado foram determinados.  
- 	
- 	\begin{figure}[H]
- 		\centering
- 		\includegraphics[width=\linewidth]{figuras/3d1.eps}
- 		\caption{Representação gráfica (vista frontal) dos pontos ótimos determinados a partir da avaliação das condições necessárias de otimalidade considerando-se $ n = 20 $. Os pontos de máximo, mínimo e de sela estão representados respectivamente em vermelho, preto e amarelo.}
- 		\label{3d1}
- 	\end{figure}
- 
- 	\begin{figure}[H]
- 		\centering
- 		\includegraphics[width=\linewidth]{figuras/3d2.eps}
- 		\caption{Representação (vista lateral) gráfica dos pontos ótimos determinados a partir da avaliação das condições necessárias de otimalidade considerando-se $ n = 20 $. Os pontos de máximo, mínimo e de sela estão representados respectivamente em vermelho, preto e amarelo.}
- 		\label{3d2}
- 	\end{figure}
- 
- 	\begin{figure}[H]
- 		\centering
- 		\includegraphics[width=\linewidth]{figuras/3d3.eps}
- 		\caption{Representação gráfica (vista inferior) dos pontos ótimos determinados a partir da avaliação das condições necessárias de otimalidade considerando-se $ n = 20 $. Os pontos de máximo, mínimo e de sela estão representados respectivamente em vermelho, preto e amarelo.}
- 		\label{3d3}
- 	\end{figure}
 
-	\section{CONCLUSÕES}
-		No presente trabalho as condições suficientes e necessárias de otimalidade foram empregadas na determinação dos pontos ótimos da função $ f(x_1, x_2) $ para que fosse possível avaliar a influência de $ x_0 $ na computação de $ x^* $. Dentro do intervalo adotado nesta análise foram determinados todos os pontos de mínimo, máximo e sela presentes, a partir do emprego da função \mcode{fsolve} e da variação dos valores atribuídos a $ x_0 $. Foi possível concluir por meio da análise dos resultados obtidos que os valores de $ x_1^* $ e $ x_2^* $ dependem diretamente de $ x_{1,0} $ e $ x_{2,0} $.
-
-	\section*{REFERÊNCIAS} % Referências
-	\begingroup
-	\renewcommand{\section}[2]{} % Remover o título das referências
-	\begin{thebibliography}{99}
-		
-		\bibitem[Lobato(2019)]{notasAula} LOBATO, Fran Sérgio. \textit{Notas de aula: Otimização Clássica}. 12 de Agosto de 2019.
-		
-		\bibitem[MathWorks(2019a)]{fsolve} MATHWORKS. \textit{Solve system of nonlinear equations - MATLAB fsolve}. Disponível em: \url{https://www.mathworks.com/help/optim/ug/fsolve.html}. Acesso em: 4 de Setembro de 2019. 
-
-		\bibitem[MathWorks(2019b)]{eig} MATHWORKS. \textit{Eigenvalues and eigenvectors - MATLAB eig}. Disponível em: \url{https://www.mathworks.com/help/matlab/ref/eig.html}. Acesso em: 4 de Setembro de 2019. 
-		
-	\end{thebibliography}
-	\endgroup 
-	
-	\newpage
-	\section*{ANEXO A}
-	
-	\begin{longtable}{@{}llllll@{}} 
-		
-		\caption{Resultados obtidos para $ n = 20 $.} \label{resultadosCompletos} \\
-		
-		\toprule
-		$x_0(1)$     & $x_0(2)$     & $ x(1) $      & $ x(2) $      & $ f $        & $ H $  \\ \midrule
-		\endhead
-		0,0000  & 0,0000  & 1,0769  & 0,0000  & -1,2056  & -1 \\
-		0,0000  & 0,7895  & 0,5560  & 1,5708  & -0,2625  & 0  \\
-		0,0000  & 1,5789  & 0,5560  & 1,5708  & -0,2625  & 0  \\
-		0,0000  & 2,3684  & 0,5560  & 1,5708  & -0,2625  & 0  \\
-		0,0000  & 3,1579  & 1,0769  & 3,1416  & -1,2056  & 0  \\
-		0,0000  & 3,9474  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-		0,0000  & 4,7368  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-		0,0000  & 5,5263  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-		0,0000  & 6,3158  & 1,0769  & 6,2832  & -1,2056  & -1 \\
-		0,0000  & 7,1053  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-		0,0000  & 7,8947  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-		0,0000  & 8,6842  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-		0,0000  & 9,4737  & 1,0769  & 9,4248  & -1,2056  & 0  \\
-		0,0000  & 10,2632 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-		0,0000  & 11,0526 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-		0,0000  & 11,8421 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-		0,0000  & 12,6316 & 1,0769  & 12,5664 & -1,2056  & -1 \\
-		0,0000  & 13,4211 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-		0,0000  & 14,2105 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-		0,0000  & 15,0000 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-		0,7895  & 0,0000  & 1,0769  & 0,0000  & -1,2056  & 0  \\
-		0,7895  & 0,7895  & 0,5560  & 1,5708  & -0,2625  & 0  \\
-		0,7895  & 1,5789  & 0,5560  & 1,5708  & -0,2625  & 0  \\
-		0,7895  & 2,3684  & 0,5560  & 1,5708  & -0,2625  & 0  \\
-		0,7895  & 3,1579  & 1,0769  & 3,1416  & -1,2056  & 0  \\
-		0,7895  & 3,9474  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-		0,7895  & 4,7368  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-		0,7895  & 5,5263  & 0,5560  & 4,7124  & -0,2625  & 0  \\
-		0,7895  & 6,3158  & 1,0769  & 6,2832  & -1,2056  & -1 \\
-		0,7895  & 7,1053  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-		0,7895  & 7,8947  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-		0,7895  & 8,6842  & 0,5560  & 7,8540  & -0,2625  & 0  \\
-		0,7895  & 9,4737  & 1,0769  & 9,4248  & -1,2056  & -1 \\
-		0,7895  & 10,2632 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-		0,7895  & 11,0526 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-		0,7895  & 11,8421 & 0,5560  & 10,9956 & -0,2625  & 0  \\
-		0,7895  & 12,6316 & 1,0769  & 12,5664 & -1,2056  & 0  \\
-		0,7895  & 13,4211 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-		0,7895  & 14,2105 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-		0,7895  & 15,0000 & 0,5560  & 14,1372 & -0,2625  & 0  \\
-		1,5789  & 0,0000  & 1,0769  & 0,0000  & -1,2056  & 0  \\
-		1,5789  & 0,7895  & 1,0769  & 0,0000  & -1,2056  & -1 \\
-		1,5789  & 1,5789  & 1,5708  & 1,5708  & 0,0000   & 1  \\
-		1,5789  & 2,3684  & 1,0769  & 3,1416  & -1,2056  & -1 \\
-		1,5789  & 3,1579  & 1,0769  & 3,1416  & -1,2056  & -1 \\
-		1,5789  & 3,9474  & 1,0769  & 3,1416  & -1,2056  & -1 \\
-		1,5789  & 4,7368  & 1,5708  & 4,7124  & 0,0000   & 1  \\
-		1,5789  & 5,5263  & 1,0769  & 6,2832  & -1,2056  & 0  \\
-		1,5789  & 6,3158  & 1,0769  & 6,2832  & -1,2056  & -1 \\
-		1,5789  & 7,1053  & 1,0769  & 6,2832  & -1,2056  & 0  \\
-		1,5789  & 7,8947  & 1,5708  & 7,8540  & 0,0000   & 1  \\
-		1,5789  & 8,6842  & 1,0769  & 9,4248  & -1,2056  & 0  \\
-		1,5789  & 9,4737  & 1,0769  & 9,4248  & -1,2056  & -1 \\
-		1,5789  & 10,2632 & 1,0769  & 9,4248  & -1,2056  & 0  \\
-		1,5789  & 11,0526 & 1,5708  & 10,9956 & 0,0000   & 1  \\
-		1,5789  & 11,8421 & 1,0769  & 12,5664 & -1,2056  & -1 \\
-		1,5789  & 12,6316 & 1,0769  & 12,5664 & -1,2056  & 0  \\
-		1,5789  & 13,4211 & 1,0769  & 12,5664 & -1,2056  & -1 \\
-		1,5789  & 14,2105 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-		1,5789  & 15,0000 & 1,0769  & 15,7080 & -1,2056  & 0  \\
-		2,3684  & 0,0000  & 1,0769  & 0,0000  & -1,2056  & -1 \\
-		2,3684  & 0,7895  & 1,0769  & 0,0000  & -1,2056  & -1 \\
-		2,3684  & 1,5789  & 1,5708  & 1,5708  & 0,0000   & 1  \\
-		2,3684  & 2,3684  & 1,0769  & 3,1416  & -1,2056  & -1 \\
-		2,3684  & 3,1579  & 1,0769  & 3,1416  & -1,2056  & -1 \\
-		2,3684  & 3,9474  & 1,0769  & 3,1416  & -1,2056  & 0  \\
-		2,3684  & 4,7368  & 1,5708  & 4,7124  & 0,0000   & 1  \\
-		2,3684  & 5,5263  & 1,0769  & 6,2832  & -1,2056  & 0  \\
-		2,3684  & 6,3158  & 1,0769  & 6,2832  & -1,2056  & 0  \\
-		2,3684  & 7,1053  & 1,5708  & 7,8540  & 0,0000   & 1  \\
-		2,3684  & 7,8947  & 1,5708  & 7,8540  & 0,0000   & 1  \\
-		2,3684  & 8,6842  & 1,0769  & 9,4248  & -1,2056  & -1 \\
-		2,3684  & 9,4737  & 1,0769  & 9,4248  & -1,2056  & 0  \\
-		2,3684  & 10,2632 & 1,5708  & 10,9956 & 0,0000   & 1  \\
-		2,3684  & 11,0526 & 1,5708  & 10,9956 & 0,0000   & 1  \\
-		2,3684  & 11,8421 & 1,0769  & 12,5664 & -1,2056  & -1 \\
-		2,3684  & 12,6316 & 1,0769  & 12,5664 & -1,2056  & -1 \\
-		2,3684  & 13,4211 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-		2,3684  & 14,2105 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-		2,3684  & 15,0000 & 1,0769  & 15,7080 & -1,2056  & -1 \\
-		3,1579  & 0,0000  & 1,0769  & 0,0000  & -1,2056  & 0  \\
-		3,1579  & 0,7895  & 1,5708  & 1,5708  & 0,0000   & 1  \\
-		3,1579  & 1,5789  & 1,5708  & 1,5708  & 0,0000   & 1  \\
-		3,1579  & 2,3684  & 1,5708  & 1,5708  & 0,0000   & 1  \\
-		3,1579  & 3,1579  & 1,0769  & 3,1416  & -1,2056  & 0  \\
-		3,1579  & 3,9474  & 1,5708  & 4,7124  & 0,0000   & 1  \\
-		3,1579  & 4,7368  & 1,5708  & 4,7124  & 0,0000   & 1  \\
-		3,1579  & 5,5263  & 1,5708  & 4,7124  & 0,0000   & 1  \\
-		3,1579  & 6,3158  & 1,0769  & 6,2832  & -1,2056  & -1 \\
-		3,1579  & 7,1053  & 1,5708  & 7,8540  & 0,0000   & 1  \\
-		3,1579  & 7,8947  & 1,5708  & 7,8540  & 0,0000   & 1  \\
-		3,1579  & 8,6842  & 1,5708  & 7,8540  & 0,0000   & 1  \\
-		3,1579  & 9,4737  & 1,0769  & 9,4248  & -1,2056  & 0  \\
-		3,1579  & 10,2632 & 1,5708  & 10,9956 & 0,0000   & 1  \\
-		3,1579  & 11,0526 & 1,5708  & 10,9956 & 0,0000   & 1  \\
-		3,1579  & 11,8421 & 1,5708  & 10,9956 & 0,0000   & 1  \\
-		3,1579  & 12,6316 & 1,0769  & 12,5664 & -1,2056  & -1 \\
-		3,1579  & 13,4211 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-		3,1579  & 14,2105 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-		3,1579  & 15,0000 & 1,5708  & 14,1372 & 0,0000   & 1  \\
-		3,9474  & 0,0000  & 5,2808  & 0,0000  & -15,0120 & -1 \\
-		3,9474  & 0,7895  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		3,9474  & 1,5789  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		3,9474  & 2,3684  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		3,9474  & 3,1579  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		3,9474  & 3,9474  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		3,9474  & 4,7368  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		3,9474  & 5,5263  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		3,9474  & 6,3158  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		3,9474  & 7,1053  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		3,9474  & 7,8947  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		3,9474  & 8,6842  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		3,9474  & 9,4737  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		3,9474  & 10,2632 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		3,9474  & 11,0526 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		3,9474  & 11,8421 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		3,9474  & 12,6316 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		3,9474  & 13,4211 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		3,9474  & 14,2105 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		3,9474  & 15,0000 & 5,0997  & 17,2788 & -9,8217  & 0  \\
-		4,7368  & 0,0000  & 5,2808  & 0,0000  & -15,0120 & -1 \\
-		4,7368  & 0,7895  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		4,7368  & 1,5789  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		4,7368  & 2,3684  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		4,7368  & 3,1579  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		4,7368  & 3,9474  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		4,7368  & 4,7368  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		4,7368  & 5,5263  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		4,7368  & 6,3158  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		4,7368  & 7,1053  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		4,7368  & 7,8947  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		4,7368  & 8,6842  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		4,7368  & 9,4737  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		4,7368  & 10,2632 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		4,7368  & 11,0526 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		4,7368  & 11,8421 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		4,7368  & 12,6316 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		4,7368  & 13,4211 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		4,7368  & 14,2105 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		4,7368  & 15,0000 & 5,2808  & 15,7080 & -15,0120 & -1 \\
-		5,5263  & 0,0000  & 5,2808  & 0,0000  & -15,0120 & -1 \\
-		5,5263  & 0,7895  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		5,5263  & 1,5789  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		5,5263  & 2,3684  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		5,5263  & 3,1579  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		5,5263  & 3,9474  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		5,5263  & 4,7368  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		5,5263  & 5,5263  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		5,5263  & 6,3158  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		5,5263  & 7,1053  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		5,5263  & 7,8947  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		5,5263  & 8,6842  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		5,5263  & 9,4737  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		5,5263  & 10,2632 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		5,5263  & 11,0526 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		5,5263  & 11,8421 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		5,5263  & 12,6316 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		5,5263  & 13,4211 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		5,5263  & 14,2105 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		5,5263  & 15,0000 & 5,2808  & 15,7080 & -15,0120 & -1 \\
-		6,3158  & 0,0000  & 5,2808  & 0,0000  & -15,0120 & -1 \\
-		6,3158  & 0,7895  & 5,2808  & 0,0000  & -15,0120 & -1 \\
-		6,3158  & 1,5789  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		6,3158  & 2,3684  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		6,3158  & 3,1579  & 5,2808  & 3,1416  & -15,0120 & -1 \\
-		6,3158  & 3,9474  & 5,0997  & 1,5708  & -9,8217  & 0  \\
-		6,3158  & 4,7368  & 5,0997  & 4,7124  & -9,8217  & 0  \\
-		6,3158  & 5,5263  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		6,3158  & 6,3158  & 5,2808  & 6,2832  & -15,0120 & -1 \\
-		6,3158  & 7,1053  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		6,3158  & 7,8947  & 5,0997  & 7,8540  & -9,8217  & 0  \\
-		6,3158  & 8,6842  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		6,3158  & 9,4737  & 5,2808  & 9,4248  & -15,0120 & -1 \\
-		6,3158  & 10,2632 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		6,3158  & 11,0526 & 5,0997  & 10,9956 & -9,8217  & 0  \\
-		6,3158  & 11,8421 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		6,3158  & 12,6316 & 5,2808  & 12,5664 & -15,0120 & -1 \\
-		6,3158  & 13,4211 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		6,3158  & 14,2105 & 5,0997  & 14,1372 & -9,8217  & 0  \\
-		6,3158  & 15,0000 & 5,2808  & 15,7080 & -15,0120 & -1 \\
-		7,1053  & 0,0000  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-		7,1053  & 0,7895  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-		7,1053  & 1,5789  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		7,1053  & 2,3684  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		7,1053  & 3,1579  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		7,1053  & 3,9474  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		7,1053  & 4,7368  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		7,1053  & 5,5263  & 7,7230  & 6,2832  & -7,7892  & 0  \\
-		7,1053  & 6,3158  & 7,7230  & 6,2832  & -7,7892  & 0  \\
-		7,1053  & 7,1053  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		7,1053  & 7,8947  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		7,1053  & 8,6842  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		7,1053  & 9,4737  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		7,1053  & 10,2632 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		7,1053  & 11,0526 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		7,1053  & 11,8421 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		7,1053  & 12,6316 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		7,1053  & 13,4211 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		7,1053  & 14,2105 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		7,1053  & 15,0000 & 7,7230  & 15,7080 & -7,7892  & 0  \\
-		7,8947  & 0,0000  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-		7,8947  & 0,7895  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		7,8947  & 1,5789  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		7,8947  & 2,3684  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		7,8947  & 3,1579  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		7,8947  & 3,9474  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		7,8947  & 4,7368  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		7,8947  & 5,5263  & 7,7230  & 6,2832  & -7,7892  & 0  \\
-		7,8947  & 6,3158  & 7,7230  & 6,2832  & -7,7892  & 0  \\
-		7,8947  & 7,1053  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		7,8947  & 7,8947  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		7,8947  & 8,6842  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		7,8947  & 9,4737  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		7,8947  & 10,2632 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		7,8947  & 11,0526 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		7,8947  & 11,8421 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		7,8947  & 12,6316 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		7,8947  & 13,4211 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		7,8947  & 14,2105 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		7,8947  & 15,0000 & 7,7230  & 15,7080 & -7,7892  & 0  \\
-		8,6842  & 0,0000  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-		8,6842  & 0,7895  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		8,6842  & 1,5789  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		8,6842  & 2,3684  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-		8,6842  & 3,1579  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		8,6842  & 3,9474  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		8,6842  & 4,7368  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		8,6842  & 5,5263  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		8,6842  & 6,3158  & 7,7230  & 6,2832  & -7,7892  & 0  \\
-		8,6842  & 7,1053  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		8,6842  & 7,8947  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		8,6842  & 8,6842  & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		8,6842  & 9,4737  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		8,6842  & 10,2632 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		8,6842  & 11,0526 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		8,6842  & 11,8421 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		8,6842  & 12,6316 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		8,6842  & 13,4211 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		8,6842  & 14,2105 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		8,6842  & 15,0000 & 7,7230  & 15,7080 & -7,7892  & 0  \\
-		9,4737  & 0,0000  & 7,7230  & 0,0000  & -7,7892  & 0  \\
-		9,4737  & 0,7895  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		9,4737  & 1,5789  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		9,4737  & 2,3684  & 7,8540  & 1,5708  & 0,0000   & 1  \\
-		9,4737  & 3,1579  & 7,7230  & 3,1416  & -7,7892  & 0  \\
-		9,4737  & 3,9474  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		9,4737  & 4,7368  & 7,8540  & 4,7124  & 0,0000   & 1  \\
-		9,4737  & 5,5263  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		9,4737  & 6,3158  & 7,7230  & 6,2832  & -7,7892  & 0  \\
-		9,4737  & 7,1053  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		9,4737  & 7,8947  & 7,8540  & 7,8540  & 0,0000   & 1  \\
-		9,4737  & 8,6842  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		9,4737  & 9,4737  & 7,7230  & 9,4248  & -7,7892  & 0  \\
-		9,4737  & 10,2632 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		9,4737  & 11,0526 & 7,8540  & 10,9956 & 0,0000   & 1  \\
-		9,4737  & 11,8421 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		9,4737  & 12,6316 & 7,7230  & 12,5664 & -7,7892  & 0  \\
-		9,4737  & 13,4211 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		9,4737  & 14,2105 & 7,8540  & 14,1372 & 0,0000   & 1  \\
-		9,4737  & 15,0000 & 7,7230  & 15,7080 & -7,7892  & 0  \\
-		10,2632 & 0,0000  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-		10,2632 & 0,7895  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		10,2632 & 1,5789  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		10,2632 & 2,3684  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-		10,2632 & 3,1579  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		10,2632 & 3,9474  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		10,2632 & 4,7368  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		10,2632 & 5,5263  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		10,2632 & 6,3158  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		10,2632 & 7,1053  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		10,2632 & 7,8947  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		10,2632 & 8,6842  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		10,2632 & 9,4737  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		10,2632 & 10,2632 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		10,2632 & 11,0526 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		10,2632 & 11,8421 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		10,2632 & 12,6316 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		10,2632 & 13,4211 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		10,2632 & 14,2105 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		10,2632 & 15,0000 & 11,2620 & 15,7080 & -33,3887 & -1 \\
-		11,0526 & 0,0000  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-		11,0526 & 0,7895  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		11,0526 & 1,5789  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		11,0526 & 2,3684  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		11,0526 & 3,1579  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		11,0526 & 3,9474  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		11,0526 & 4,7368  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		11,0526 & 5,5263  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		11,0526 & 6,3158  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		11,0526 & 7,1053  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		11,0526 & 7,8947  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		11,0526 & 8,6842  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		11,0526 & 9,4737  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		11,0526 & 10,2632 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		11,0526 & 11,0526 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		11,0526 & 11,8421 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		11,0526 & 12,6316 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		11,0526 & 13,4211 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		11,0526 & 14,2105 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		11,0526 & 15,0000 & 11,2620 & 15,7080 & -33,3887 & -1 \\
-		11,8421 & 0,0000  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-		11,8421 & 0,7895  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		11,8421 & 1,5789  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		11,8421 & 2,3684  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		11,8421 & 3,1579  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		11,8421 & 3,9474  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		11,8421 & 4,7368  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		11,8421 & 5,5263  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		11,8421 & 6,3158  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		11,8421 & 7,1053  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		11,8421 & 7,8947  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		11,8421 & 8,6842  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		11,8421 & 9,4737  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		11,8421 & 10,2632 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		11,8421 & 11,0526 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		11,8421 & 11,8421 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		11,8421 & 12,6316 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		11,8421 & 13,4211 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		11,8421 & 14,2105 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		11,8421 & 15,0000 & 11,2620 & 15,7080 & -33,3887 & -1 \\
-		12,6316 & 0,0000  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-		12,6316 & 0,7895  & 11,2620 & 0,0000  & -33,3887 & -1 \\
-		12,6316 & 1,5789  & 11,1741 & 1,5708  & -22,1706 & 0  \\
-		12,6316 & 2,3684  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		12,6316 & 3,1579  & 11,2620 & 3,1416  & -33,3887 & -1 \\
-		12,6316 & 3,9474  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		12,6316 & 4,7368  & 11,1741 & 4,7124  & -22,1706 & 0  \\
-		12,6316 & 5,5263  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		12,6316 & 6,3158  & 11,2620 & 6,2832  & -33,3887 & -1 \\
-		12,6316 & 7,1053  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		12,6316 & 7,8947  & 11,1741 & 7,8540  & -22,1706 & 0  \\
-		12,6316 & 8,6842  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		12,6316 & 9,4737  & 11,2620 & 9,4248  & -33,3887 & -1 \\
-		12,6316 & 10,2632 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		12,6316 & 11,0526 & 11,1741 & 10,9956 & -22,1706 & 0  \\
-		12,6316 & 11,8421 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		12,6316 & 12,6316 & 11,2620 & 12,5664 & -33,3887 & -1 \\
-		12,6316 & 13,4211 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		12,6316 & 14,2105 & 11,1741 & 14,1372 & -22,1706 & 0  \\
-		12,6316 & 15,0000 & 11,2620 & 15,7080 & -33,3887 & -1 \\
-		13,4211 & 0,0000  & 14,0658 & 0,0000  & -14,1016 & 0  \\
-		13,4211 & 0,7895  & 14,1372 & 1,5708  & 0,0000   & 1  \\
-		13,4211 & 1,5789  & 14,1372 & 1,5708  & 0,0000   & 1  \\
-		13,4211 & 2,3684  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-		13,4211 & 3,1579  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-		13,4211 & 3,9474  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		13,4211 & 4,7368  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		13,4211 & 5,5263  & 14,0658 & 6,2832  & -14,1016 & 0  \\
-		13,4211 & 6,3158  & 14,0658 & 6,2832  & -14,1016 & 0  \\
-		13,4211 & 7,1053  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		13,4211 & 7,8947  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		13,4211 & 8,6842  & 14,0658 & 9,4248  & -14,1016 & 0  \\
-		13,4211 & 9,4737  & 14,0658 & 9,4248  & -14,1016 & 0  \\
-		13,4211 & 10,2632 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-		13,4211 & 11,0526 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-		13,4211 & 11,8421 & 14,0658 & 12,5664 & -14,1016 & 0  \\
-		13,4211 & 12,6316 & 14,0658 & 12,5664 & -14,1016 & 0  \\
-		13,4211 & 13,4211 & 14,1372 & 14,1372 & 0,0000   & 1  \\
-		13,4211 & 14,2105 & 14,1372 & 14,1372 & 0,0000   & 1  \\
-		13,4211 & 15,0000 & 14,0658 & 15,7080 & -14,1016 & 0  \\
-		14,2105 & 0,0000  & 14,0658 & 0,0000  & -14,1016 & 0  \\
-		14,2105 & 0,7895  & 14,1372 & 1,5708  & 0,0000   & 1  \\
-		14,2105 & 1,5789  & 14,1372 & 1,5708  & 0,0000   & 1  \\
-		14,2105 & 2,3684  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-		14,2105 & 3,1579  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-		14,2105 & 3,9474  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		14,2105 & 4,7368  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		14,2105 & 5,5263  & 14,0658 & 6,2832  & -14,1016 & 0  \\
-		14,2105 & 6,3158  & 14,0658 & 6,2832  & -14,1016 & 0  \\
-		14,2105 & 7,1053  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		14,2105 & 7,8947  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		14,2105 & 8,6842  & 14,0658 & 9,4248  & -14,1016 & 0  \\
-		14,2105 & 9,4737  & 14,0658 & 9,4248  & -14,1016 & 0  \\
-		14,2105 & 10,2632 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-		14,2105 & 11,0526 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-		14,2105 & 11,8421 & 14,0658 & 12,5664 & -14,1016 & 0  \\
-		14,2105 & 12,6316 & 14,0658 & 12,5664 & -14,1016 & 0  \\
-		14,2105 & 13,4211 & 14,1372 & 14,1372 & 0,0000   & 1  \\
-		14,2105 & 14,2105 & 14,1372 & 14,1372 & 0,0000   & 1  \\
-		14,2105 & 15,0000 & 14,0658 & 15,7080 & -14,1016 & 0  \\
-		15,0000 & 0,0000  & 14,0658 & 0,0000  & -14,1016 & 0  \\
-		15,0000 & 0,7895  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-		15,0000 & 1,5789  & 14,1372 & 1,5708  & 0,0000   & 1  \\
-		15,0000 & 2,3684  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		15,0000 & 3,1579  & 14,0658 & 3,1416  & -14,1016 & 0  \\
-		15,0000 & 3,9474  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		15,0000 & 4,7368  & 14,1372 & 4,7124  & 0,0000   & 1  \\
-		15,0000 & 5,5263  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		15,0000 & 6,3158  & 14,0658 & 6,2832  & -14,1016 & 0  \\
-		15,0000 & 7,1053  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		15,0000 & 7,8947  & 14,1372 & 7,8540  & 0,0000   & 1  \\
-		15,0000 & 8,6842  & 14,0658 & 9,4248  & -14,1016 & 0  \\
-		15,0000 & 9,4737  & 14,0658 & 9,4248  & -14,1016 & 0  \\
-		15,0000 & 10,2632 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-		15,0000 & 11,0526 & 14,1372 & 10,9956 & 0,0000   & 1  \\
-		15,0000 & 11,8421 & 14,0658 & 12,5664 & -14,1016 & 0  \\
-		15,0000 & 12,6316 & 14,0658 & 12,5664 & -14,1016 & 0  \\
-		15,0000 & 13,4211 & 14,1372 & 14,1372 & 0,0000   & 1  \\
-		15,0000 & 14,2105 & 14,1372 & 14,1372 & 0,0000   & 1  \\
-		15,0000 & 15,0000 & 14,0658 & 15,7080 & -14,1016 & 0  \\ \bottomrule
-	\end{longtable}
-	
-	\newpage
-	\section{ANEXO B}
-	
-	Código utilizado na computação de $ x_1^* $ e $ x_2^* $.
-	
+	A implementação do Método da Seção Áurea pode ser avaliado abaixo. 
 	\begin{lstlisting}
-	clc; clear; close all;
+function [xOpt, fOpt, k] = aureaSec(f,a,b,tol)
+	tal = 0.618;
 	
-	nData = 20;
+	if nargin < 4
+	tol = 1e-8;
+	end
 	
-	results = zeros(nData^2,5);
-	x0Values = linspace(0,15,nData);
-	fValues = zeros(nData);
-	x1Values = zeros(nData);
-	x2Values = zeros(nData);
-	maxValues = zeros(nData);
-	minValues = zeros(nData);
-	noneValues = zeros(nData);
-	H = zeros(2);
+	alfa = a + (1 - tal)*(b - a);
+	beta = a + tal*(b - a);
+	fAlfa = f(alfa);
+	fBeta = f(beta);
+	
 	k = 1;
 	
-	opt = optimoptions('fsolve','Display','off');
-	
-	for i = 1:nData
-		for j = 1:nData
-			x0 = [x0Values(i), x0Values(j)];
-			x = fsolve(@firstDevSystem,x0,opt);
-			f = x(1)*sin(x(1)) - x(1)*(cos(x(2)))^2 - x(1);
-			
-			H(1,1) = 2*cos(x(1)) - x(1)*sin(x(1));
-			H(1,2) = 2*cos(x(2))*sin(x(2));
-			H(2,1) = H(1,2);
-			H(2,2) = 2*x(1)*((cos(x(2)))^2 - (sin(x(2)))^2);
-			
-			lambda = eig(H);
-			
-			results(k,1) = x0Values(i);
-			results(k,2) = x0Values(j);
-			results(k,3) = x(1);
-			results(k,4) = x(2);
-			results(k,5) = f;
-			
-			if all(all(lambda > 0)) 
-				results(k,6) =  -1;
-				minValues(i,j) = f;
-				maxValues(i,j) = 1;
-				noneValues(i,j) = 1;
-			elseif all(all(lambda < 0)) 
-				results(k,6) = 1;
-				minValues(i,j) = 1;
-				maxValues(i,j) = f;
-				noneValues(i,j) = 1;
-			else 
-				results(k,6) = 0;
-				minValues(i,j) = 1;
-				maxValues(i,j) = 1;
-				noneValues(i,j) = f;
-			end
-			
-			fValues(i,j) = f;
-			x1Values(i,j) = x(1);
-			x2Values(i,j) = x(2);
-			
-			k = k + 1;
+	while abs(a-b) > tol
+		if fBeta < fAlfa 
+			a = alfa;
+			alfa = beta;
+			fAlfa = fBeta;
+			beta = a + tal*(b - a);
+			fBeta = f(beta);
+		elseif fAlfa <= fBeta
+			b = beta;
+			beta = alfa;
+			fBeta = fAlfa;
+			alfa = a + (1 - tal)*(b - a);
+			fAlfa = f(alfa);
 		end
+		k = k + 1;
 	end
 	
-	%%
-	close all; clc;
+	xOpt = (alfa+beta)/2;
+	fOpt = f(xOpt);
 	
-	% Apresentando grafico de f no intevalor adotado 0 < x1, x2 < 15
-	h = figure;
-	x = linspace(0,15,200);
-	y = linspace(0,15,200);
-	[X,Y] = meshgrid(x, y);
-	Z = X.*sin(X) - X.*(cos(Y)).^2 - X;
-	s = surf(X,Y,Z);
-	s.EdgeColor = 'none';
-	
-	sizeAxis = axis;
-	
-	hold on;
-	plot3(x1Values,x2Values,minValues,'.k','MarkerSize',40);
-	plot3(x1Values,x2Values,maxValues,'.r','MarkerSize',40);
-	plot3(x1Values,x2Values,noneValues,'.y','MarkerSize',40);
-	
-	colormap winter;
-	fullScreen;
-	sizeAxis(1:4) = [0 15 0 15];
-	axis(sizeAxis);
-	set(gca,'FontSize',25);
-	set(gca,'TickLabelInterpreter','latex');
-	xlabel('x_1');
-	ylabel('x_2');
-	zlabel('f(x_1, x_2)');
-	printI('3d1');
-	
-	% Salvando os dados da execucao em um arquivo excel
-	x01 = results(:,1);
-	x02 = results(:,2); 
-	x1 = results(:,3);
-	x2 = results(:,4);
-	f = results(:,5);
-	H = results(:,6);
-	resultsTable = table(x01, x02, x1, x2, f, H);
-	
-	excelFile = 'tabelas/results.xlsx';
-	writetable(resultsTable,excelFile);
-
-	function F = firstDevSystem(x)
-		F(1) = sin(x(1)) + x(1)*cos(x(1)) - (cos(x(2)))^2 - 1;
-		F(2) = 2*x(1)*cos(x(2))*sin(x(2));
-	end
-
+end
 	\end{lstlisting}
 	
+	Todos os códigos introduzidos nos presente trabalho podem ser acessados no link \url{https://github.com/ArthurIasbeck/OTMC3}.
+	
+	% ==============================================================================================
+	% EXERCÍCIO 2 ==================================================================================
+	% ==============================================================================================
+	
+	\section*{EXERCÍCIO 2}
+	
+	No Exercício 2 foi proposta a solução de Problemas de Programação Linear a partir do emprego do Método Gráfico. As funções a serem minimizadas ou maximizadas, denotadas por $ f_1(x) $, $ f_2(x) $ e $ f_3(x) $ são introduzidas nas Eqs. \ref{f1}, \ref{f2} e \ref{f3}. 
+	\begin{gather}
+		min \; f_1(x) = 2 x_1 \label{f1} \\
+		max \; f_2(x) = -4 x_2 \label{f2} \\
+		max \; f_3(x) = 3 x_1 + 3  \label{f3} 
+	\end{gather} 
+	
+	As restrições às quais estão sujeitas $ f_1(x) $, $ f_2(x) $ e $ f_3(x) $ são apresentadas nas Eqs. \ref{rest1} a \ref{rest5}.
+	\begin{gather}
+		-x_1 + 2 x_2 \leq 0 \label{rest1} \\
+		2 x_1 - 3 x_2 \leq 3 \label{rest2} \\
+		x_1 + 3 x_2 \leq 6 \label{rest3} \\
+		x_1 \geq 0 \label{rest4} \\
+		x_2 \geq 0 \label{rest5} 
+	\end{gather} 
+	
+	A implementação do Método Gráfico para minimização ou maximização de $ f_1(x) $, $ f_2(x) $ e $ f_3(x) $ pode ser verificada nas Figs. \ref{f1Img}, \ref{f2Img} e \ref{f3Img}.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{figuras/1.jpeg}
+		\caption{Resultado da implementação do método gráfico para minimização de $ f_1(x) $. }
+		\label{f1Img}
+	\end{figure}
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{figuras/2.jpeg}
+		\caption{Resultado da implementação do método gráfico para minimização de $ f_2(x) $. }
+		\label{f2Img}
+	\end{figure}
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=0.8\linewidth]{figuras/3.jpeg}
+		\caption{Resultado da implementação do método gráfico para minimização de $ f_3(x) $. }
+		\label{f3Img}
+	\end{figure}
+	
+	É possível observar que a partir da minimização de $ f_1(x) $ são obtidas infinitas soluções para $ x^* $, uma vez que o valor de $ f_1(x) $ depende somente de $ x_1 $, que deve ser igual a zero para que $ f_1(x) $ seja minimizado. Já a maximização de $ f_2(x) $ conduz a $ x^* = \left[ \begin{array}{c c} 0 & 0 \end{array} \right] $. A maximização de $ f_3(x) $ por sua vez, indica que $ x^* $ se encontra na interseção das retas construídas a partir das restrições introduzidas nas Eqs. \ref{rest2} e \ref{rest3}, o que implica que a determinação de $ x^* $ se dá pela solução do sistema 
+	\begin{eqnarray}
+		\begin{cases}
+			2 x_1^* - 3 x_2^* = 3 \\
+			x_1^* + 3 x_2^* = 6
+		\end{cases}
+	\end{eqnarray}
+ 	
+ 	\noindent de forma que $ x_1^* = 3 $ e $ x_2^* = 1 $.
+ 	
+ 	% ==============================================================================================
+ 	% EXERCÍCIO 3 ==================================================================================
+ 	% ==============================================================================================
+ 	
+ 	\section{EXERCÍCIO 3}
+ 	
+ 	No Exercício 3 foi proposta a solução do Problema de Programação Linear descrito em Carpio, R. C; Silva, R. J.; Jorge, A. B. \textit{“Otimização da Mistura de Combustíveis Secundários Alternativos Visando Atender as Restrições Operacionais e Ambientais em Fornos de Cimenteiras”}. Foi proposta neste caso a função objetivo introduzida na Eq. \ref{fObj3}.
+ 	\begin{equation}
+	 	\begin{split}
+		 	min \; f(x) = 0,93 x_1 + 0,54 x_2 + 1,54 x_3 + 0,77 x_4 + 35 x_5 + 40 x_6 - 50 x_7 \\
+		 	 + 0,031((5,76ms - 5,82) e^{-0,2ms + 0,98})
+		 	\label{fObj3}
+	 	\end{split}
+ 	\end{equation}
+ 	
+ 	\noindent sendo 
+ 	\begin{equation}
+	 	ms = \frac{5 x_1 + 61,62 x_2 + 93 x_3 + 7,6 x_4 + 9,32 x_5 + 22 x_7}{1,86 x_1 + 25,6 x_2 + 4,07 x_3 + 84,1 x_4 + 12,29 x_5 + 10,54 x_7}
+ 	\end{equation}
+ 	
+ 	Além disso, o estudo de caso proposto apresenta 19 restrições de ordem operacional, representadas como restrições de igualdade e desigualdade, todas elas lineares. 
+ 	
+ 	Para verificação da influência da parcela não linear de $ f(x) $ na determinação da solução do problema, foram adotadas duas abordagens. Na primeira delas, esta parcela não linear foi desconsideradas e $ x^* $ foi determinado a partir do emprego de uma rotina do Matlab\textsuperscript{\textregistered} chamada \mcode{linprog}. Já na segunda abordagem, a parcela não linear de $ f(x) $ foi levada em consideração e a obtenção de $ x^* $ se deu a partir da implementação de outra rotina do Matlab\textsuperscript{\textregistered} denominada \mcode{fmincon}. Cabe ressaltar que ambas as funções recebem como entrada restrições de desigualdade do tipo $ Ax \leq b $, o que implica que restrições da forma $ Ax \geq b $ devem ser transformadas multiplicando-se ambos os lados por $ -1 $.
+ 	
+ 	Os resultados obtidos em cada uma das abordagens são apresentados na Tab. \ref{resultados3}. O valor de $ f(x^*) $ apresentado por Carpio \textit{et al.} foi o mesmo obtido no emprego da primeira abordagem. Além disso, como era esperado, a consideração da parcela não linear acabou por acarretar um aumento no valor da função objetivo, apesar de terem sido observadas mudanças pouco significativas no valor de $ x^* $.
+ 	
+ 	% Please add the following required packages to your document preamble:
+ 	% \usepackage{multirow}
+ 	\begin{table}[H]
+ 		\centering
+ 		\caption{Resultados obtidos a partir da minimização de $ f(x) $, ora levando em conta sua parcela não linear e ora desconsiderando-a.}
+ 		\label{resultados3}
+ 		\begin{tabular}{|c|c|c|}
+ 			\hline
+ 			\multirow{2}{*}{} & \multicolumn{2}{c|}{Abordagem} \\ \cline{2-3} 
+ 			& 1              & 2             \\ \hline
+ 			$x_1$             & 1,21928        & 1,21938       \\ \hline
+ 			$x_2$             & 0,22635        & 0,21749       \\ \hline
+ 			$x_3$             & 0              & 0             \\ \hline
+ 			$x_4$             & 0              & 0,00842       \\ \hline
+ 			$x_5$             & 0              & 0             \\ \hline
+ 			$x_6$             & 0,07841        & 0,07841       \\ \hline
+ 			$x_7$             & 0,02804        & 0,02804       \\ \hline
+ 			$f$               & 2,991          & 3,376         \\ \hline
+ 		\end{tabular}
+ 	\end{table}
+ 
+ 	Os códigos empregados na implementação das abordagens 1 e 2, respectivamente, são apresentados a seguir.
+ 	
+ 	\begin{lstlisting}	
+clc; clear; close all; format long;
+
+% As restricoes sao representadas matricialmente, logo, cada linha da
+% matriz A representa uma retricao de desigualdade, enquanto cada linha da
+% matriz Aeq representa uma restricao de igualdade. 
+
+% Restricoes de desigualdade
+A = [-50.6 -1.23 -1.13 -0.71 -1.03 0 -0.93 
+     50.6 1.23 1.13 0.71 1.03 0 0.93
+     -5.04  -61.62  -93  -7.6 -9.32 0 -1.93
+     5.04 61.62 93 7.6 9.32 0 1.93 
+     -1.19 -16.59 -2.87 -1.13 -5.08 0 -0.09
+     1.19 16.59 2.87 1.13 5.08 0 0.09
+     -0.67 -9.01 -1.2 -82.97 -7.21 0 -0.13 
+     0.67 9.01 1.2 82.97 7.21 0 0.13
+     0.78 0 0.1 0 0.44 0 0.12 
+     -0.762 -2.74 -83.64 185.83 18.96 0 -1.422
+     0.018 -7.5 82.011 -219.47 -23.88 0 1.335
+     -0.319 -4.877 -1.31 106.73 4.29 0 0.074
+     -0.619 -7.737 -0.37 -222.88 -14.387 0 -0.25
+     -38.24 155.67 173.6 164.34 37.86 0 2.93
+     35.48 -190.65 -212.43 -201 -46.51 0 -3.78
+     0 0 0 0 0.046 0.07 0.0123
+     0 0 0 0 25392 34436 0];
+
+b = [-62 67 -9 25 -2 9 -1 5 6.5 0 0 0 0 0 0 0.05 2700];
+
+% Restricoes de igualdade
+Aeq = [0 0 0 0 25392 34436 32100
+0 0 0 0 0 0 32100];
+beq = [3600 900];
+
+% Restricoes laterais
+lb = [0 0 0 0 0 0 0];
+
+f = [0.93 0.54 1.54 0.77 35 40 -50];
+
+x = linprog(f,A,b,Aeq,beq,lb);
+
+C = f*x;
+
+display(x);
+display(C);
+ 	\end{lstlisting}
+ 	
+ 	\begin{lstlisting}
+clc; clear; close all; format long; 
+
+fun = @fObj;
+x0 = rand(1,7);
+% Restricoes de desigualdade
+% Restricoes de desigualdade
+A = [-50.6 -1.23 -1.13 -0.71 -1.03 0 -0.93 
+     50.6 1.23 1.13 0.71 1.03 0 0.93
+     -5.04  -61.62  -93  -7.6 -9.32 0 -1.93
+     5.04 61.62 93 7.6 9.32 0 1.93 
+     -1.19 -16.59 -2.87 -1.13 -5.08 0 -0.09
+     1.19 16.59 2.87 1.13 5.08 0 0.09
+     -0.67 -9.01 -1.2 -82.97 -7.21 0 -0.13 
+     0.67 9.01 1.2 82.97 7.21 0 0.13
+     0.78 0 0.1 0 0.44 0 0.12 
+     -0.762 -2.74 -83.64 185.83 18.96 0 -1.422
+     0.018 -7.5 82.011 -219.47 -23.88 0 1.335
+     -0.319 -4.877 -1.31 106.73 4.29 0 0.074
+     -0.619 -7.737 -0.37 -222.88 -14.387 0 -0.25
+     -38.24 155.67 173.6 164.34 37.86 0 2.93
+     35.48 -190.65 -212.43 -201 -46.51 0 -3.78
+     0 0 0 0 0.046 0.07 0.0123
+     0 0 0 0 25392 34436 0];
+
+b = [-62 67 -9 25 -2 9 -1 5 6.5 0 0 0 0 0 0 0.05 2700];
+
+% Restricoes de igualdade
+Aeq = [0 0 0 0 25392 34436 32100
+0 0 0 0 0 0 32100];
+beq = [3600 900];
+
+% Restricoes laterais
+lb = [0 0 0 0 0 0 0];
+
+x = fmincon(fun,x0,A,b,Aeq,beq,lb);
+
+C = fun(x);
+
+display(x);
+display(C);
+
+function F = fObj(x)
+	ms = (5*x(1) + 61.62*x(2) + 93*x(3) + 7.6*x(4) + 9.32*x(5) + 22*x(7))/ ...
+	(1.86*x(1) + 25.6*x(2) + 4.07*x(3) + 84.1*x(4) + 12.29*x(5) + ...
+	10.54*x(7));
+	F = 0.93*x(1) + 0.54*x(2) + 1.54*x(3) + 0.77*x(4) + 35*x(5) + ...
+	40*x(6) - 50*x(7) + 0.031*((5.76*ms - 5.82)*exp(-0.2*ms + 0.98));
+end
+ 	\end{lstlisting}
+ 
 \end{document}

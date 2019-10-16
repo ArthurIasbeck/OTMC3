@@ -1,4 +1,4 @@
-init;
+init; format long;
 
 % As restrições são representadas matricialmente, logo, cada linha da
 % matriz A representa uma retrição de desigualdade, enquanto cada linha da

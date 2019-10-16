@@ -7,6 +7,7 @@ n = 3;
 numGrad = 0; 
 x0 = [0, 0, 0]';
 tol = 1e-4;
+theta = 0;
 
 % Definição da função objetivo
 f = @(x) 4250*x(1).^2 - 1000*x(1)*x(2) - 2500*x(1)*x(3) - 1000*x(1) + ...
@@ -33,10 +34,10 @@ H = eye(n);
 
 while 1 
     % Reduzir a dimensão do problema de otimização
-    f1 = @(alfa) f(x0 - alfa*H*df(x0));
+    g = @(alfa) f(x0 - alfa*H*df(x0));
     
     % Resolver o problema de otimização uni-dimensional
-    [alfaOpt,~,nVal1] = aureaSec(f1,-1,1,1e-4);
+    [alfaOpt,~,nVal1] = aureaSec(g,-1,1,1e-4);
     
     % Atualizar a solução ótima
     x = x0 - alfaOpt*H*df(x0);
@@ -65,7 +66,6 @@ while 1
     y = df(x) - df(x0);
     sigma = p'*y;
     tal = y'*H*y;
-    theta = 1;
     D = ((sigma + theta*tal)/sigma^2)*(p*p') ...
         + ((theta - 1)/tal)*(H*y)*(H*y)' ...
         - (theta/sigma)*(H*y*p' + p*(H*y)');
